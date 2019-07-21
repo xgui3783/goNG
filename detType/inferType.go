@@ -1,6 +1,9 @@
 package detType
 
-import "path/filepath"
+import (
+	"gong/common"
+	"path/filepath"
+)
 
 func InferTypeFromFilename(filename string) string {
 	ext := filepath.Ext(filename)
@@ -11,7 +14,12 @@ func InferTypeFromFilename(filename string) string {
 		return VTK
 	}
 	if ext == ".stl" {
-		return STL_ASCII
+		stlBytes := common.GetResource(filename)
+		if string(stlBytes[:5]) == "solid" {
+			return STL_ASCII
+		} else {
+			return STL_BINARY
+		}
 	}
 	panic("ext not recognised")
 }

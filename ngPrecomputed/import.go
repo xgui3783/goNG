@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-func Import(rootPath string, labelMap map[int]gltf.GltfMaterial) common.Mesh {
+func Import(rootPath string, labelMap map[int]gltf.GltfMaterial) []common.Mesh {
 
 	// defaultMaterial := gltf.GltfMaterial{
 	// 	Name: "default-material",
@@ -51,7 +51,7 @@ func Import(rootPath string, labelMap map[int]gltf.GltfMaterial) common.Mesh {
 			if err != nil {
 				panic(err)
 			}
-			return ParseFragmentBuffer(buf)
+			return []common.Mesh{ParseFragmentBuffer(buf)}
 		}
 
 		// get labelIndices

@@ -1,7 +1,10 @@
 package common
 
 import (
+	"gong/detProtocol"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"os"
 )
 
@@ -11,6 +14,10 @@ type Face [3]uint32
 type Mesh struct {
 	Vertices []Vertex `json:"vertices"`
 	Faces    []Face   `json:"faces"`
+}
+
+type MeshMetadata struct {
+	Index int
 }
 
 func FindMin(nums []float32) float32 {
@@ -81,3 +88,39 @@ func CheckFileExists(inputFilepath string) bool {
 	}
 	panic(err)
 }
+
+func GetResource(rootPath string) []byte {
+	switch detProtocol.InferProtocolFromFilename(rootPath) {
+	case detProtocol.Local:
+		filebytes, err := ioutil.ReadFile(rootPath)
+		if err != nil {
+			panic(err)
+		}
+		return filebytes
+	case detProtocol.HTTP:
+		return GetHTTPResource(rootPath)
+	default:
+		panic("Get resource error")
+	}
+}
+
+func GetHTTPResource(rootPath string) []byte {
+	resp, err := http.Get(rootPath)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, moreErr := ioutil.ReadAll(resp.Body)
+	if moreErr != nil {
+		panic(moreErr)
+	}
+	return body
+}
+
+const (
+	/**
+	* some file formats, such as STL, does not provide vertices as an array
+	* in such a case, FLOAT_TOLERANCE will be used to determine the spatial resolution between two points
+	 */
+	FLOAT_TOLERANCE = 1.0e-6
+)

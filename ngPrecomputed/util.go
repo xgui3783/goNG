@@ -7,7 +7,6 @@ import (
 	"gong/common"
 	"io/ioutil"
 	"math"
-	"net/http"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -49,15 +48,7 @@ func parseMeshInfoString(meshInfoString []byte) []string {
 func GetHttpFragments(rootPath string, index int) []string {
 	strKey := strconv.Itoa(index)
 	url := rootPath + strKey + ":0"
-	resp, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
+	body := common.GetHTTPResource(url)
 	return parseMeshInfoString(body)
 }
 
