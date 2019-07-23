@@ -176,4 +176,6 @@ func WriteGii(mesh common.Mesh) []byte {
 	return append([]byte(GII_HEADER), giiBytes...)
 }
 
-const GII_HEADER = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE GIFTI SYSTEM "http://gifti.projects.nitrc.org/gifti.dtd">\n`
+const GII_HEADER = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE GIFTI SYSTEM "http://gifti.projects.nitrc.org/gifti.dtd">
+`
