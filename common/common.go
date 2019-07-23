@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"regexp"
 )
 
 type Vertex [3]float32
@@ -15,6 +16,8 @@ type Mesh struct {
 	Vertices []Vertex `json:"vertices"`
 	Faces    []Face   `json:"faces"`
 }
+
+type TransformationMatrix [4][4]float64
 
 type MeshMetadata struct {
 	Index int
@@ -115,6 +118,14 @@ func GetHTTPResource(rootPath string) []byte {
 		panic(moreErr)
 	}
 	return body
+}
+
+func SplitStringByWhiteSpaceNL(inputBytes string) []string {
+	reTrimBeginning := regexp.MustCompile(`(^[\s]+|[\s]+$)`)
+	trimmedString := reTrimBeginning.ReplaceAllString(inputBytes, "")
+
+	re := regexp.MustCompile(`(?m)[\s]+`)
+	return re.Split(trimmedString, -1)
 }
 
 const (

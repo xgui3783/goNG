@@ -4,15 +4,23 @@ import (
 	"fmt"
 	"gong/common"
 	"gong/detType"
+	"gong/gii"
 	"gong/ngPrecomputed"
 	"gong/stlAscii"
 	"gong/stlBinary"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 )
 
 func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "error: %v", r)
+		}
+	}()
 
 	if inputSource == "" {
 		panic("inputSource is empty\n")
@@ -34,6 +42,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		meshes = ngPrecomputed.Import(inputSource, nil)
 	case detType.STL_ASCII:
 		meshes = stlAscii.Import(inputSource)
+	case detType.GII:
+		meshes = gii.Import(inputSource)
 	default:
 		panic("incoming file type other than NG_MESH is currently not supported\n")
 	}
@@ -54,6 +64,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		for idx, mesh := range meshes {
 			outBuffer = append(outBuffer, stlBinary.WriteBinaryStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
 		}
+	case detType.GII:
+		outBuffer = gii.Export(meshes)
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
 	}

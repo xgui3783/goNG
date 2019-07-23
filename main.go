@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	validInputFormats := []string{detType.NG_MESH}
+	validInputFormats := []string{detType.NG_MESH, detType.STL_ASCII, detType.STL_BINARY, detType.GII}
 	inputFormatHelperText := fmt.Sprintf("Format of the input file. If left empty, the program will try to deduce it by parsing the file extension. The possible values are %v", validInputFormats)
 	inputFormatPtr := flag.String("inputFormat", "", inputFormatHelperText)
 
