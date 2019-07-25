@@ -21,6 +21,9 @@ func InferTypeFromFilename(filename string) string {
 			return STL_BINARY
 		}
 	}
+	if ext == ".obj" {
+		return OBJ
+	}
 	if ext == ".gii" {
 		return GII
 	}
@@ -33,4 +36,5 @@ const (
 	STL_ASCII  = "STL_ASCII"
 	STL_BINARY = "STL_BINARY"
 	GII        = "GII"
+	OBJ        = "OBJ"
 )

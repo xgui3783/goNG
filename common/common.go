@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Vertex [3]float32
@@ -120,12 +122,48 @@ func GetHTTPResource(rootPath string) []byte {
 	return body
 }
 
-func SplitStringByWhiteSpaceNL(inputBytes string) []string {
-	reTrimBeginning := regexp.MustCompile(`(^[\s]+|[\s]+$)`)
-	trimmedString := reTrimBeginning.ReplaceAllString(inputBytes, "")
+func SplitByNewLine(input string) []string {
+	re := regexp.MustCompile(`\n`)
+	return re.Split(input, -1)
+}
 
+func TrimStartingEndingWhiteSpaces(inputBytes string) string {
+	reTrimBeginning := regexp.MustCompile(`(^[\s]+|[\s]+$)`)
+	return reTrimBeginning.ReplaceAllString(inputBytes, "")
+}
+
+func SplitStringByWhiteSpaceNL(inputBytes string) []string {
+	trimmedString := TrimStartingEndingWhiteSpaces(inputBytes)
 	re := regexp.MustCompile(`(?m)[\s]+`)
 	return re.Split(trimmedString, -1)
+}
+
+func ParseStringAsFloatsWDelimiter(input string, delimiter string) []float32 {
+	splitString := strings.Split(input, delimiter)
+	returnFloats := []float32{}
+	for _, s := range splitString {
+		f, err := strconv.ParseFloat(s, 32)
+		if err != nil {
+			panic(err)
+		}
+		returnFloats = append(returnFloats, float32(f))
+	}
+
+	return returnFloats
+}
+
+func ParseStringAsIntsWDelimiter(input string, delimiter string) []uint32 {
+	splitString := strings.Split(input, delimiter)
+	returnInts := []uint32{}
+	for _, s := range splitString {
+		pInt, err := strconv.ParseInt(s, 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		returnInts = append(returnInts, uint32(pInt))
+	}
+
+	return returnInts
 }
 
 const (

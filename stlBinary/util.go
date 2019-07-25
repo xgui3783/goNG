@@ -56,8 +56,6 @@ func WriteBinaryStlFromMesh(mesh common.Mesh, metadata common.MeshMetadata) []by
 		panic(err)
 	}
 
-	// fmt.Printf("header written, buffer size %v\n", strconv.Itoa(len(buf.Bytes())))
-
 	numVertices := len(mesh.Vertices)
 	numFaces := len(mesh.Faces)
 
@@ -71,7 +69,6 @@ func WriteBinaryStlFromMesh(mesh common.Mesh, metadata common.MeshMetadata) []by
 	for _, f := range mesh.Faces {
 		vertices := [3]common.Vertex{}
 		for idx, vIndex := range f {
-			fmt.Printf("index: %v, vindex: %v\n", idx, vIndex)
 			vertices[idx] = mesh.Vertices[vIndex]
 		}
 		assembled := assemble(vertices)

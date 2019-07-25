@@ -6,6 +6,7 @@ import (
 	"gong/detType"
 	"gong/gii"
 	"gong/ngPrecomputed"
+	"gong/obj"
 	"gong/stlAscii"
 	"gong/stlBinary"
 	"io/ioutil"
@@ -44,6 +45,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		meshes = stlAscii.Import(inputSource)
 	case detType.GII:
 		meshes = gii.Import(inputSource)
+	case detType.OBJ:
+		meshes = obj.Import(inputSource)
 	default:
 		panic("incoming file type other than NG_MESH is currently not supported\n")
 	}
@@ -64,6 +67,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		for idx, mesh := range meshes {
 			outBuffer = append(outBuffer, stlBinary.WriteBinaryStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
 		}
+	case detType.OBJ:
+		outBuffer = obj.Export(meshes)
 	case detType.GII:
 		outBuffer = gii.Export(meshes)
 	default:
