@@ -84,7 +84,7 @@ func parseObjLine(line string, mesh *common.Mesh) {
 	case "g ":
 		fallthrough
 	case "s ":
-		fmt.Printf("NYI")
+		fmt.Printf("NYI: %v", firstTwochar)
 	}
 
 	return
