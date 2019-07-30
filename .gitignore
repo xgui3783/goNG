@@ -2,3 +2,5 @@ data
 run.sh
 .vscode
 gong
+*.sh
+bin

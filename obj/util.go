@@ -35,7 +35,7 @@ func WriteMeshToBytes(mesh common.Mesh) []byte {
 
 	//faces
 	for _, face := range mesh.Faces {
-		s := fmt.Sprintf("f %d %d %d\n", face[0] + 1, face[1] +1 , face[2] +1 )
+		s := fmt.Sprintf("f %d %d %d\n", face[0]+1, face[1]+1, face[2]+1)
 		returnybtes = append(returnybtes, []byte(s)...)
 	}
 
