@@ -9,6 +9,7 @@ import (
 	"gong/obj"
 	"gong/stlAscii"
 	"gong/stlBinary"
+	"gong/vtk"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -47,6 +48,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		meshes = gii.Import(inputSource)
 	case detType.OBJ:
 		meshes = obj.Import(inputSource)
+	case detType.VTK:
+		meshes = vtk.Import(inputSource)
 	default:
 		panic("incoming file type other than NG_MESH is currently not supported\n")
 	}
@@ -71,6 +74,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		outBuffer = obj.Export(meshes)
 	case detType.GII:
 		outBuffer = gii.Export(meshes)
+	case detType.VTK:
+		outBuffer = vtk.Export(meshes)
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
 	}
