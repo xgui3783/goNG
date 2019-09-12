@@ -101,22 +101,20 @@ func TestParseCommaDelimitedString(t *testing.T) {
 
 func TestFlipTriangle(t *testing.T) {
 	mesh := Mesh{
-		Vertices: []Vertex{
-			Vertex{0.0, 1.0, 2.0},
-			Vertex{-1.0, -2.0, -3.0},
-		},
+		Vertices: []Vertex{},
 		Faces: []Face{
-			Face{},
+			Face{0, 1, 2},
+			Face{0, 2, 3},
 		},
 	}
 
 	mesh.FlipTriangleOrder()
 
-	if mesh.Vertices[0][0] != 1.0 || mesh.Vertices[0][1] != 0.0 || mesh.Vertices[0][2] != 2.0 {
-		t.Errorf("Expected triangle order flipped, did not")
+	if mesh.Faces[0][0] != 2 || mesh.Faces[0][1] != 1 || mesh.Faces[0][2] != 0 {
+		t.Errorf("Expected face order flipped, did not")
 	}
-	if mesh.Vertices[1][0] != -2.0 || mesh.Vertices[1][1] != -1.0 || mesh.Vertices[1][2] != -3.0 {
-		t.Errorf("Expected triangle order flipped, did not, neg")
+	if mesh.Faces[1][0] != 3 || mesh.Faces[1][1] != 2 || mesh.Faces[1][2] != 0 {
+		t.Errorf("Expected face order flipped, did not, 2")
 	}
 }
 

@@ -72,9 +72,9 @@ func (m *TransformationMatrix) Det() float64 {
 }
 
 func (mesh *Mesh) FlipTriangleOrder() {
-	for vIdx, vertex := range mesh.Vertices {
-		mesh.Vertices[vIdx][0] = vertex[1]
-		mesh.Vertices[vIdx][1] = vertex[0]
+	for fIdx, face := range mesh.Faces {
+		mesh.Faces[fIdx][0] = face[2]
+		mesh.Faces[fIdx][2] = face[0]
 	}
 }
 
