@@ -53,6 +53,31 @@ func (m *TransformationMatrix) ParseCommaDelimitedString(input string) {
 	}
 }
 
+// adopted from http://glmatrix.net/docs/mat4.js.html#line341
+func (m *TransformationMatrix) Det() float64 {
+  b00 := m[0][0] * m[1][1] - m[0][1] * m[1][0]
+  b01 := m[0][0] * m[1][2] - m[0][2] * m[1][0]
+  b02 := m[0][0] * m[1][3] - m[0][3] * m[1][0]
+  b03 := m[0][1] * m[1][2] - m[0][2] * m[1][1]
+  b04 := m[0][1] * m[1][3] - m[0][3] * m[1][1]
+  b05 := m[0][2] * m[1][3] - m[0][3] * m[1][2]
+  b06 := m[2][0] * m[3][1] - m[2][1] * m[3][0]
+  b07 := m[2][0] * m[3][2] - m[2][2] * m[3][0]
+  b08 := m[2][0] * m[3][3] - m[2][3] * m[3][0]
+  b09 := m[2][1] * m[3][2] - m[2][2] * m[3][1]
+  b10 := m[2][1] * m[3][3] - m[2][3] * m[3][1]
+	b11 := m[2][2] * m[3][3] - m[2][3] * m[3][2]
+
+	return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
+}
+
+func (mesh *Mesh) FlipTriangleOrder() {
+	for vIdx, vertex := range mesh.Vertices {
+		mesh.Vertices[vIdx][0] = vertex[1]
+		mesh.Vertices[vIdx][1] = vertex[0]
+	}
+}
+
 type MeshMetadata struct {
 	Index int
 }

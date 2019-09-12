@@ -61,6 +61,10 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		for vIdx, _ := range meshes[mIdx].Vertices {
 			meshes[mIdx].Vertices[vIdx].Transform(xformMatrix)
 		}
+
+		if xformMatrix.Det() < 0 {
+			meshes[mIdx].FlipTriangleOrder()
+		}
 	}
 
 	var outBuffer []([]byte)

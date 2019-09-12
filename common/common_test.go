@@ -98,3 +98,40 @@ func TestParseCommaDelimitedString(t *testing.T) {
 	testScaling(t)
 	testTranslation(t)
 }
+
+func TestFlipTriangle(t *testing.T) {
+	mesh := Mesh{
+		Vertices: []Vertex{
+			Vertex{0.0, 1.0, 2.0},
+			Vertex{-1.0, -2.0, -3.0},
+		},
+		Faces: []Face{
+			Face{},
+		},
+	}
+
+	mesh.FlipTriangleOrder()
+
+	if mesh.Vertices[0][0] != 1.0 || mesh.Vertices[0][1] != 0.0 || mesh.Vertices[0][2] != 2.0 {
+		t.Errorf("Expected triangle order flipped, did not")
+	}
+	if mesh.Vertices[1][0] != -2.0 || mesh.Vertices[1][1] != -1.0 || mesh.Vertices[1][2] != -3.0 {
+		t.Errorf("Expected triangle order flipped, did not, neg")
+	}
+}
+
+func TestDet(t *testing.T){
+	
+	var xformM TransformationMatrix
+	xformM.ParseCommaDelimitedString("1,0,0,0,0,1,0,0,0,0,1,0")
+
+	if xformM.Det() != 1.0 {
+		t.Errorf("expected det to equal 1, but does not")
+	}
+
+	xformM.ParseCommaDelimitedString("0,1,0,0,1,0,0,0,0,0,1,0")
+
+	if xformM.Det() != -1.0 {
+		t.Errorf("expeected det to equal -1, but does not")
+	}
+}
