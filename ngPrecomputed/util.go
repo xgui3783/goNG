@@ -1,6 +1,7 @@
 package ngPrecomputed
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -72,27 +73,25 @@ func GetLocalFragments(rootPath string, index int) []string {
 }
 
 func WriteFragmentFromMesh(mesh common.Mesh) []byte {
-	output := make([]byte, 0)
+	buf := new(bytes.Buffer)
 	numVertex := len(mesh.Vertices)
-	binary.LittleEndian.PutUint32(output[0:4], uint32(numVertex))
 
-	for vIndex, v := range mesh.Vertices {
-		for cIndex, c := range v {
-			offset := vIndex*12 + cIndex*4 + 4
-			bits := math.Float32bits(c)
-			binary.LittleEndian.PutUint32(output[offset:offset+4], bits)
+	binary.Write(buf, binary.LittleEndian, uint32(numVertex))
+
+	for _, vertex := range mesh.Vertices {
+		for _, coord := range vertex {
+
+			binary.Write(buf, binary.LittleEndian, math.Float32bits(coord))
 		}
 	}
 
-	initFaceOffset := 4 + numVertex*4*3
-	for vIndex, v := range mesh.Faces {
-		for cIndex, c := range v {
-			offset := initFaceOffset + vIndex*12 + cIndex*4
-			binary.LittleEndian.PutUint32(output[offset:offset+4], c)
+	for _, face := range mesh.Faces {
+		for _, vIndex := range face {
+			binary.Write(buf, binary.LittleEndian, uint32(vIndex))
 		}
 	}
 
-	return output
+	return buf.Bytes()
 }
 
 func ParseFragmentBuffer(buffer []byte) common.Mesh {

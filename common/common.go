@@ -9,10 +9,21 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type Vertex [3]float32
 type Face [3]uint32
+
+func (v *Vertex) Transform(m TransformationMatrix) {
+	var prev Vertex
+	for idx := 0; idx<=2; idx ++ {
+		prev[idx] = v[idx]
+	}
+	for idx := 0; idx<=2; idx ++ {
+		v[idx] = prev[0] * float32(m[idx][0]) + prev[1] * float32(m[idx][1]) + prev[2] * float32(m[idx][2]) + 1 * float32(m[idx][3])
+	}
+}
 
 type Mesh struct {
 	Vertices []Vertex `json:"vertices"`
@@ -20,6 +31,27 @@ type Mesh struct {
 }
 
 type TransformationMatrix [4][4]float64
+
+func (m *TransformationMatrix) ParseCommaDelimitedString(input string) {
+	vals := strings.Split(input, ",")
+	if len(vals) != 12 && len(vals) != 16 {
+		panicText := fmt.Sprintf("ParseCommaDelimitedString needs to have 12 or 16 elements, but instead has %v elements\n", len(vals))
+		panic(panicText)
+	}
+	for idx, val := range vals {
+		row := int(idx / 4)
+		col := int(idx % 4)
+		var err error
+		m[row][col], err = strconv.ParseFloat(val, 64)
+		if err != nil {
+			panicText := fmt.Sprintf("Parse float error! %v", err)
+			panic(panicText)
+		}
+	}
+	if len(vals) == 12 {
+		m[3] = [4]float64{0.0, 0.0, 0.0, 1.0}
+	}
+}
 
 type MeshMetadata struct {
 	Index int

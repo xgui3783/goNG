@@ -64,19 +64,19 @@ func testIntArrays(t *testing.T, arr1 []int, arr2 []int) {
 }
 
 func TestScanLocalDir(t *testing.T) {
-	labelIndicies := ScanLocalDir("../data/corticalMesh")
+	labelIndicies := ScanLocalDir("./test_dir")
 	expected := []int{1, 2, 3, 4, 5, 6, 7}
 	testIntArrays(t, expected, labelIndicies)
 }
 
 func TestGetLocalFragments(t *testing.T) {
-	localFragments := GetLocalFragments("../data/corticalMesh", 1)
+	localFragments := GetLocalFragments("./test_dir", 1)
 	expected := []string{"fragment_1_0", "fragment_1_1"}
 	testStringArrays(t, expected, localFragments)
 }
 
 func TestParseFragmentBuffer(t *testing.T) {
-	buffer, err := ioutil.ReadFile("../data/corticalMesh/fragment_1_0")
+	buffer, err := ioutil.ReadFile("./test_dir/fragment_1_0")
 	if err != nil {
 		panic(err)
 	}

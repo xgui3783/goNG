@@ -16,7 +16,7 @@ import (
 	"regexp"
 )
 
-func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string) {
+func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -31,6 +31,9 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 	if outputDest == "" {
 		panic("outputSource is empty\n")
 	}
+
+	var xformMatrix common.TransformationMatrix
+	xformMatrix.ParseCommaDelimitedString(xformMatrixString)
 
 	var meshes []common.Mesh
 	var incFileType string
@@ -52,6 +55,12 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		meshes = vtk.Import(inputSource)
 	default:
 		panic("incoming file type other than NG_MESH is currently not supported\n")
+	}
+
+	for mIdx, _ := range meshes {
+		for vIdx, _ := range meshes[mIdx].Vertices {
+			meshes[mIdx].Vertices[vIdx].Transform(xformMatrix)
+		}
 	}
 
 	var outBuffer []([]byte)
@@ -76,6 +85,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		outBuffer = gii.Export(meshes)
 	case detType.VTK:
 		outBuffer = vtk.Export(meshes)
+	case detType.NG_MESH:
+		outBuffer = ngPrecomputed.Export(meshes)
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
 	}

@@ -50,3 +50,51 @@ func TestSplitStringByWhiteSpaceNL(t *testing.T) {
 	splitMultiLineNeedsTrimming := SplitStringByWhiteSpaceNL(multipleNeedsTrimming)
 	testReturn(&splitMultiLineNeedsTrimming)
 }
+
+func assertPanic(t *testing.T, f func()) {
+	defer func () {
+		if r := recover(); r == nil {
+			t.Errorf("expected to panic, did not")
+		}
+	}()
+	
+	f()
+}
+
+func testScaling(t *testing.T) {
+	var xformM TransformationMatrix
+	xformM.ParseCommaDelimitedString("2,0,0,0,0,2,0,0,0,0,2,0")
+
+	vertex := Vertex{1.0, 2.0, 3.0}
+	vertex.Transform(xformM)
+
+	if vertex[0] != 2.0 || vertex[1] != 4.0 || vertex[2] != 6.0 {
+		t.Errorf("unexpected scalling output %v", vertex)
+	}
+}
+
+func testTranslation(t *testing.T) {
+
+	var xformM TransformationMatrix
+	xformM.ParseCommaDelimitedString("1,0,0,2,0,1,0,2,0,0,1,2")
+
+	vertex := Vertex{1.0, 2.0, 3.0}
+	vertex.Transform(xformM)
+
+	if vertex[0] != 3.0 || vertex[1] != 4.0 || vertex[2] != 5.0 {
+		t.Errorf("unexpected scalling output %v", vertex)
+	}
+}
+
+func TestParseCommaDelimitedString(t *testing.T) {
+	var xformM TransformationMatrix
+	assertPanic(t, func(){
+		xformM.ParseCommaDelimitedString("1,2,3")
+	})
+	assertPanic(t, func(){
+		xformM.ParseCommaDelimitedString("1,0,0,0,0,1,0,0,0,0,1,test")
+	})
+
+	testScaling(t)
+	testTranslation(t)
+}

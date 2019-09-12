@@ -73,3 +73,11 @@ func Import(rootPath string, labelMap map[int]gltf.GltfMaterial) []common.Mesh {
 
 	panic("not yet implemented")
 }
+
+func Export(meshes []common.Mesh) [][]byte {
+	returnBytes := [][]byte{}
+	for _, mesh := range meshes {
+		returnBytes = append(returnBytes, WriteFragmentFromMesh(mesh))
+	}
+	return returnBytes
+}
