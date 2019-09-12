@@ -9,9 +9,8 @@ import (
 )
 
 func parseStlAsciiLine(line []byte) common.Vertex {
-
-	snRegexpString := `[0-9]\.[0-9]*[eE]-?[0-9][0-9]*`
-	vertReString := fmt.Sprintf(`(%v)\W*?(%v)\W*?(%v)`, snRegexpString, snRegexpString, snRegexpString)
+	snRegexpString := `-?[0-9]{1,}\.?[0-9]{0,}e?-?[0-9]{0,}`
+	vertReString := fmt.Sprintf(`(%v)\s{1,}(%v)\s{1,}(%v)`, snRegexpString, snRegexpString, snRegexpString)
 	re3 := regexp.MustCompile(vertReString)
 	match := re3.FindSubmatch(line)
 	x, err := strconv.ParseFloat(string(match[1]), 32)
@@ -66,9 +65,9 @@ func ParseAsciiStl(buffer []byte) common.Mesh {
 	}
 	faces := []common.Face{}
 	for _, triangle := range triangles {
-		re2 := regexp.MustCompile(`(?m)vertex\W(.*?)$`)
+		re2 := regexp.MustCompile(`(?m)vertex\s{1,}(.*?)$`)
 		vertices := re2.FindAll(triangle, -1)
-
+		
 		parsedVertices := [3]common.Vertex{
 			parseStlAsciiLine(vertices[0]),
 			parseStlAsciiLine(vertices[1]),
