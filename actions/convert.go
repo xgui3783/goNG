@@ -16,7 +16,7 @@ import (
 	"regexp"
 )
 
-func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string) {
+func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string, flipTriangle bool, forceTriangleFlag bool) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -62,8 +62,14 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 			meshes[mIdx].Vertices[vIdx].Transform(xformMatrix)
 		}
 
-		if xformMatrix.Det() < 0 {
-			meshes[mIdx].FlipTriangleOrder()
+		if forceTriangleFlag {
+			if flipTriangle {
+				meshes[mIdx].FlipTriangleOrder()
+			}
+		} else {
+			if xformMatrix.Det() < 0 {
+				meshes[mIdx].FlipTriangleOrder()
+			}
 		}
 	}
 
