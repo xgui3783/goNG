@@ -107,7 +107,7 @@ func parseFaceLine(line string) ObjFace {
 				if err != nil {
 					panic(err)
 				}
-				r.Vertex = append(r.Vertex, uint32(parsedUint))
+				r.Vertex = append(r.Vertex, uint32(parsedUint) - 1)
 			case 1:
 				if digit == "" {
 					continue
@@ -116,7 +116,7 @@ func parseFaceLine(line string) ObjFace {
 				if err != nil {
 					panic(err)
 				}
-				r.VertexTexture = append(r.Vertex, uint32(parsedUint))
+				r.VertexTexture = append(r.Vertex, uint32(parsedUint) - 1)
 			case 2:
 				if digit == "" {
 					continue
@@ -125,7 +125,7 @@ func parseFaceLine(line string) ObjFace {
 				if err != nil {
 					panic(err)
 				}
-				r.VertexNormal = append(r.Vertex, uint32(parsedUint))
+				r.VertexNormal = append(r.Vertex, uint32(parsedUint) - 1)
 			}
 		}
 	}
