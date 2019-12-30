@@ -1,11 +1,10 @@
 package ngPrecomputed
 
 import (
+	"fmt"
 	"io/ioutil"
 	"testing"
 )
-
-//TODO make less verbose
 
 func testStringArrays(t *testing.T, arr1 []string, arr2 []string) {
 
@@ -63,20 +62,22 @@ func testIntArrays(t *testing.T, arr1 []int, arr2 []int) {
 	}
 }
 
+const MESH_DIR = "../testData/ngMeshDir"
+
 func TestScanLocalDir(t *testing.T) {
-	labelIndicies := ScanLocalDir("./test_dir")
+	labelIndicies := ScanLocalDir(MESH_DIR)
 	expected := []int{1, 2, 3, 4, 5, 6, 7}
 	testIntArrays(t, expected, labelIndicies)
 }
 
 func TestGetLocalFragments(t *testing.T) {
-	localFragments := GetLocalFragments("./test_dir", 1)
+	localFragments := GetLocalFragments(MESH_DIR, 1)
 	expected := []string{"fragment_1_0", "fragment_1_1"}
 	testStringArrays(t, expected, localFragments)
 }
 
 func TestParseFragmentBuffer(t *testing.T) {
-	buffer, err := ioutil.ReadFile("./test_dir/fragment_1_0")
+	buffer, err := ioutil.ReadFile(fmt.Sprintf("%v/fragment_1_0", MESH_DIR))
 	if err != nil {
 		panic(err)
 	}
