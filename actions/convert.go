@@ -114,7 +114,8 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 			writeBytesToFile(filename, bytes)
 		}
 	}
-	fmt.Print("done\n")
+
+	fmt.Fprintf(os.Stderr, "done")
 }
 
 func writeBytesToFile(filename string, buf []byte) {
