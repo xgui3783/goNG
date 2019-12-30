@@ -19,6 +19,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
+      with:
+        # need to checkout lfs files for unit tests
+        lfs: true
       
       # go get -v -t -d ./...
     - name: Run tests
