@@ -12,6 +12,6 @@ func TestMain(t *testing.T) {
 		t.Errorf("reading testData/cube.stl fail. test data not readable")
 	}
 	if string(cube[:5]) != "solid" {
-		t.Errorf("cube.stl first 5 characters does not equal solid")
+		t.Errorf("cube.stl first 5 characters does not equal solid, instead it is: %v", string(cube[:5]))
 	}
 }
