@@ -33,7 +33,7 @@ TODO code examples
 
 requirements: 
 ```
-go >= 1.13
+go >= 1.11
 git
 git lfs # for downloading testing meshes
 ```
