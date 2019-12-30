@@ -18,6 +18,5 @@ jobs:
 
     - name: Run tests
       run: |
-        go version
-        pwd
+        go get -v -t -d ./...
         go test ./...
