@@ -18,7 +18,7 @@ func main() {
 	srcFormatHelperText := fmt.Sprintf("Format of the input file. If left empty, the program will try to deduce it by parsing the file extension. The possible values are %v", validSrcFormats)
 	srcFormatPtr := flag.String("srcFormat", "", srcFormatHelperText)
 
-	srcHelperText := "Source of input. May start with http:// , in which case, the program will first fetch the file, then parse it. (NYI) If left empty it will accept STDIN"
+	srcHelperText := "Source of input. May start with http:// , in which case, the program will first fetch the file, then parse it." // If left empty it will accept STDIN
 	srcPtr := flag.String("src", "", srcHelperText)
 
 	validOutputFormats := []string{
@@ -31,7 +31,7 @@ func main() {
 	outputFormatHelperText := fmt.Sprintf("Format of the output file. If left empty, the program will try to deduce it by parsing the file extension. The possible values are %v", validOutputFormats)
 	outputFormatPtr := flag.String("outputFormat", "", outputFormatHelperText)
 
-	dstHelperText := "Source of output. (NYI) If left empty it output to STDOUT "
+	dstHelperText := "Dest of output." //  If left empty it output to STDOUT
 	dstPtr := flag.String("dst", "", dstHelperText)
 
 	xformMatrixHelperText := "4x3, organised row major, comma separated. 1,0,0,0,0,1,0,0,0,0,1,0 == identity, 1,0,0,10,0,1,0,11,0,0,1,12 === same scale, but translated by 10, 11, 12. Last row assumed to be 0,0,0,1"
@@ -49,7 +49,7 @@ Usage: -flipTriangle -flipTriangle=false
 
 	flag.Parse()
 
-	flag.Visit(func(f *flag.Flag){
+	flag.Visit(func(f *flag.Flag) {
 		if f.Name == "forceTriangleFlip" {
 			forceTriangleFlag = true
 		}

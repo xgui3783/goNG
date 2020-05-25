@@ -1,4 +1,4 @@
-name: Go
+name: Unit tests
 on: [push]
 jobs:
   unit_tests:
@@ -23,7 +23,6 @@ jobs:
         # need to checkout lfs files for unit tests
         lfs: true
       
-      # go get -v -t -d ./...
     - name: Run tests
       run: |
         go test ./...
