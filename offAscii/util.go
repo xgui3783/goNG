@@ -133,10 +133,13 @@ func parseFace(line string) (face common.Face, err error) {
 	}()
 
 	ints := common.ParseStringAsIntsWDelimiter(line, " ")
-	if len(ints) < 3 {
+	if len(ints) < 4 {
 		panic("parseFace not getting 3 results in return")
 	}
-	face = common.Face{ints[0], ints[1], ints[2]}
+	if ints[0] != 3 {
+		panic("first index of face does not equal 3")
+	}
+	face = common.Face{ints[1], ints[2], ints[3]}
 	return
 }
 
