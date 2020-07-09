@@ -10,7 +10,7 @@ jobs:
     
     strategy:
       matrix:
-        os: [ ubuntu-18.10 ] # macos-latest, windows-latest
+        os: [ ubuntu-latest ] # macos-latest, windows-latest
         go: [ 1.13 ] # 1.12, 1.11
 
     runs-on: ${{ matrix.os }}
