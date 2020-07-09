@@ -7,10 +7,10 @@ import (
 	"gong/gii"
 	"gong/ngPrecomputed"
 	"gong/obj"
+	"gong/offAscii"
 	"gong/stlAscii"
 	"gong/stlBinary"
 	"gong/vtk"
-	"gong/offAscii"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -100,7 +100,7 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		outBuffer = vtk.Export(meshes)
 	case detType.NG_MESH:
 		outBuffer = ngPrecomputed.Export(meshes)
-	case detType.OFF_ASCII
+	case detType.OFF_ASCII:
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
 	}
