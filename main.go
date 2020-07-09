@@ -14,6 +14,7 @@ func main() {
 		detType.STL_BINARY,
 		detType.GII,
 		detType.OBJ,
+		detType.OFF_ASCII,
 	}
 	srcFormatHelperText := fmt.Sprintf("Format of the input file. If left empty, the program will try to deduce it by parsing the file extension. The possible values are %v", validSrcFormats)
 	srcFormatPtr := flag.String("srcFormat", "", srcFormatHelperText)
@@ -27,6 +28,7 @@ func main() {
 		detType.STL_ASCII,
 		detType.GII,
 		detType.OBJ,
+		detType.OFF_ASCII,
 	}
 	outputFormatHelperText := fmt.Sprintf("Format of the output file. If left empty, the program will try to deduce it by parsing the file extension. The possible values are %v", validOutputFormats)
 	outputFormatPtr := flag.String("outputFormat", "", outputFormatHelperText)

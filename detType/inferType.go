@@ -27,6 +27,10 @@ func InferTypeFromFilename(filename string) string {
 	if ext == ".gii" {
 		return GII
 	}
+	if ext == ".off" {
+		// TODO determine ascii or binary
+		return OFF_ASCII
+	}
 	panic("ext not recognised")
 }
 
@@ -37,4 +41,5 @@ const (
 	STL_BINARY = "STL_BINARY"
 	GII        = "GII"
 	OBJ        = "OBJ"
+	OFF_ASCII  = "OFF_ASCII"
 )

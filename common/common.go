@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"gong/detProtocol"
 	"io/ioutil"
 	"math"
@@ -9,25 +10,26 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 type Vertex [3]float32
 type Face [3]uint32
+type Normal [3]float32
 
 func (v *Vertex) Transform(m TransformationMatrix) {
 	var prev Vertex
-	for idx := 0; idx<=2; idx ++ {
+	for idx := 0; idx <= 2; idx++ {
 		prev[idx] = v[idx]
 	}
-	for idx := 0; idx<=2; idx ++ {
-		v[idx] = prev[0] * float32(m[idx][0]) + prev[1] * float32(m[idx][1]) + prev[2] * float32(m[idx][2]) + 1 * float32(m[idx][3])
+	for idx := 0; idx <= 2; idx++ {
+		v[idx] = prev[0]*float32(m[idx][0]) + prev[1]*float32(m[idx][1]) + prev[2]*float32(m[idx][2]) + 1*float32(m[idx][3])
 	}
 }
 
 type Mesh struct {
 	Vertices []Vertex `json:"vertices"`
 	Faces    []Face   `json:"faces"`
+	// VertexNormals []Normal `json:"vertexNormals"`
 }
 
 type TransformationMatrix [4][4]float64
@@ -55,20 +57,20 @@ func (m *TransformationMatrix) ParseCommaDelimitedString(input string) {
 
 // adopted from http://glmatrix.net/docs/mat4.js.html#line341
 func (m *TransformationMatrix) Det() float64 {
-  b00 := m[0][0] * m[1][1] - m[0][1] * m[1][0]
-  b01 := m[0][0] * m[1][2] - m[0][2] * m[1][0]
-  b02 := m[0][0] * m[1][3] - m[0][3] * m[1][0]
-  b03 := m[0][1] * m[1][2] - m[0][2] * m[1][1]
-  b04 := m[0][1] * m[1][3] - m[0][3] * m[1][1]
-  b05 := m[0][2] * m[1][3] - m[0][3] * m[1][2]
-  b06 := m[2][0] * m[3][1] - m[2][1] * m[3][0]
-  b07 := m[2][0] * m[3][2] - m[2][2] * m[3][0]
-  b08 := m[2][0] * m[3][3] - m[2][3] * m[3][0]
-  b09 := m[2][1] * m[3][2] - m[2][2] * m[3][1]
-  b10 := m[2][1] * m[3][3] - m[2][3] * m[3][1]
-	b11 := m[2][2] * m[3][3] - m[2][3] * m[3][2]
+	b00 := m[0][0]*m[1][1] - m[0][1]*m[1][0]
+	b01 := m[0][0]*m[1][2] - m[0][2]*m[1][0]
+	b02 := m[0][0]*m[1][3] - m[0][3]*m[1][0]
+	b03 := m[0][1]*m[1][2] - m[0][2]*m[1][1]
+	b04 := m[0][1]*m[1][3] - m[0][3]*m[1][1]
+	b05 := m[0][2]*m[1][3] - m[0][3]*m[1][2]
+	b06 := m[2][0]*m[3][1] - m[2][1]*m[3][0]
+	b07 := m[2][0]*m[3][2] - m[2][2]*m[3][0]
+	b08 := m[2][0]*m[3][3] - m[2][3]*m[3][0]
+	b09 := m[2][1]*m[3][2] - m[2][2]*m[3][1]
+	b10 := m[2][1]*m[3][3] - m[2][3]*m[3][1]
+	b11 := m[2][2]*m[3][3] - m[2][3]*m[3][2]
 
-	return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
+	return b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06
 }
 
 func (mesh *Mesh) FlipTriangleOrder() {
