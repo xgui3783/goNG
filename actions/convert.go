@@ -13,17 +13,20 @@ import (
 	"gong/vtk"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 )
 
-func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string, flipTriangle bool, forceTriangleFlag bool) {
+func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string, flipTriangle bool, forceTriangleFlag bool, splitMeshConfig common.SplitMeshConfig) {
 
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintf(os.Stderr, "error: %v", r)
 		}
 	}()
+
+	pathToMeshSplitVertexFile := splitMeshConfig.SplitMeshByVerticesPath
 
 	if inputSource == "" {
 		panic("inputSource is empty\n")
@@ -76,8 +79,22 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		}
 	}
 
+	submeshNameToMeshMap := map[string]common.Mesh{}
+	if pathToMeshSplitVertexFile != "" {
+		meshMap, vertexMap := common.ProcessSplitMeshByVertexfile(pathToMeshSplitVertexFile)
+
+		for meshIdx, mesh := range meshes {
+			splitMeshMap := common.SplitMesh(&mesh, &meshMap, &vertexMap)
+			for key, val := range *splitMeshMap {
+				submeshName := fmt.Sprintf("%v_%v", meshIdx, key)
+				submeshNameToMeshMap[submeshName] = val
+			}
+		}
+	}
+
 	var outBuffer []([]byte)
 	var outFileType string
+	fragmentOutBuffer := map[string][]byte{}
 	if outputFormat == "" {
 		outFileType = detType.InferTypeFromFilename(outputDest)
 	} else {
@@ -88,18 +105,36 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		for idx, mesh := range meshes {
 			outBuffer = append(outBuffer, stlAscii.WriteAsciiStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
 		}
+		if len(submeshNameToMeshMap) > 0 {
+			fmt.Printf("submeshes not yet implemented for STL_ASCII")
+		}
 	case detType.STL_BINARY:
 		for idx, mesh := range meshes {
 			outBuffer = append(outBuffer, stlBinary.WriteBinaryStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
 		}
+		if len(submeshNameToMeshMap) > 0 {
+			fmt.Printf("submeshes not yet implemented for STL_BINARY")
+		}
 	case detType.OBJ:
 		outBuffer = obj.Export(meshes)
+		for key, mesh := range submeshNameToMeshMap {
+			fragmentOutBuffer[key] = obj.Export([]common.Mesh{mesh})[0]
+		}
 	case detType.GII:
 		outBuffer = gii.Export(meshes)
+		for key, mesh := range submeshNameToMeshMap {
+			fragmentOutBuffer[key] = gii.Export([]common.Mesh{mesh})[0]
+		}
 	case detType.VTK:
 		outBuffer = vtk.Export(meshes)
+		for key, mesh := range submeshNameToMeshMap {
+			fragmentOutBuffer[key] = vtk.Export([]common.Mesh{mesh})[0]
+		}
 	case detType.NG_MESH:
 		outBuffer = ngPrecomputed.Export(meshes)
+		for key, mesh := range submeshNameToMeshMap {
+			fragmentOutBuffer[key] = ngPrecomputed.Export([]common.Mesh{mesh})[0]
+		}
 	case detType.OFF_ASCII:
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
@@ -115,6 +150,28 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 			filename := re.ReplaceAllStringFunc(outputDest, func(ext string) string {
 				return fmt.Sprintf("_%d%v", idx, ext)
 			})
+			writeBytesToFile(filename, bytes)
+		}
+	}
+
+	if len(fragmentOutBuffer) > 0 {
+		fragmentDir := fmt.Sprintf("%v_fragments/", outputDest)
+		if fi, err := os.Stat(fragmentDir); os.IsNotExist(err) {
+			if err := os.Mkdir(fragmentDir, 0755); err != nil {
+				panic(err)
+			}
+		} else if !(fi.Mode().IsDir()) {
+			panicText := fmt.Sprintf("%v path already exist", fragmentDir)
+			panic(panicText)
+		}
+
+		for key, bytes := range fragmentOutBuffer {
+
+			fragmentFilename := path.Join(fragmentDir, key)
+
+			ext := filepath.Ext(outputDest)
+			filename := fmt.Sprintf("%v%v", fragmentFilename, ext)
+
 			writeBytesToFile(filename, bytes)
 		}
 	}

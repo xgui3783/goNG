@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"gong/actions"
+	"gong/common"
 	"gong/detType"
 )
 
@@ -49,6 +50,26 @@ Usage: -flipTriangle -flipTriangle=false
 
 	forceTriangleFlag := false
 
+	splitMeshByVertexHelperText := `Path to a text file outlining how the mesh should be split by vertex
+The text file should follow the format:
+
+0 label_a
+1 label_a
+2 label_b
+
+where index_# can be parsed as uint32 and label_# should be [a-zA-Z0-9-_]+
+
+In the above example, vertices with index 0 and 1 belong to label_a, but vertex with index 2 belong to label_b 
+`
+
+	splitMeshByVertex := flag.String("splitByVertexPath", "", splitMeshByVertexHelperText)
+
+	validAmbiguousStrategies := []string{
+		common.EMPTY_LABEL,
+	}
+	splitMeshAmbiguousStrategyHelperTxt := fmt.Sprintf(`Strategy when there are ambiguous triangles %v`, validAmbiguousStrategies)
+	splitMeshAmbiguousStrategy := flag.String("splitMeshAmbiguousStrategy", common.EMPTY_LABEL, splitMeshAmbiguousStrategyHelperTxt)
+
 	flag.Parse()
 
 	flag.Visit(func(f *flag.Flag) {
@@ -57,5 +78,9 @@ Usage: -flipTriangle -flipTriangle=false
 		}
 	})
 
-	actions.Convert(*srcFormatPtr, *srcPtr, *outputFormatPtr, *dstPtr, *xformMatrix, *flipTriangle, forceTriangleFlag)
+	splitMeshConfig := common.SplitMeshConfig{
+		UntangleAmbiguityMethod: *splitMeshAmbiguousStrategy,
+		SplitMeshByVerticesPath: *splitMeshByVertex,
+	}
+	actions.Convert(*srcFormatPtr, *srcPtr, *outputFormatPtr, *dstPtr, *xformMatrix, *flipTriangle, forceTriangleFlag, splitMeshConfig)
 }

@@ -3,7 +3,6 @@ package stlBinary
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"gong/common"
 	"math"
 )
@@ -56,16 +55,13 @@ func WriteBinaryStlFromMesh(mesh common.Mesh, metadata common.MeshMetadata) []by
 		panic(err)
 	}
 
-	numVertices := len(mesh.Vertices)
 	numFaces := len(mesh.Faces)
 
 	err = binary.Write(buf, binary.LittleEndian, uint32(numFaces))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("num vertex written\n")
 
-	fmt.Printf("vertices length %v\n", numVertices)
 	for _, f := range mesh.Faces {
 		vertices := [3]common.Vertex{}
 		for idx, vIndex := range f {

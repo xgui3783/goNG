@@ -19,6 +19,7 @@ TODO code examples
 - gifti
 - obj
 - vtk
+- OFF ascii
 
 ## Output formats
 
@@ -28,6 +29,7 @@ TODO code examples
 - gifti
 - obj
 - vtk
+- OFF ascii
 
 # Development
 
