@@ -126,7 +126,7 @@ func appendMesh(meshObjMap *map[string]*MeshObj, label string, vertex0 *Vertex, 
 	}
 }
 
-func SplitMesh(inputMesh *Mesh, meshMap *MeshMap, vertexMap *VertexMap) (splitMeshesPtr *map[string]Mesh) {
+func SplitMesh(inputMesh *Mesh, meshMap *MeshMap, vertexMap *VertexMap, splitMeshConfig *SplitMeshConfig) (splitMeshesPtr *map[string]Mesh) {
 	splitMeshesPtr = &(map[string]Mesh{})
 	meshObjMap := map[string]*MeshObj{}
 
@@ -148,8 +148,22 @@ func SplitMesh(inputMesh *Mesh, meshMap *MeshMap, vertexMap *VertexMap) (splitMe
 			appendMesh(&meshObjMap, vertexLabel0, vertex0, vertex1, vertex2)
 		} else {
 			// not all three vertex indices agree to label...
-			// TODO implement how to deal with this scenario
-			appendMesh(&meshObjMap, EMPTY_LABEL, vertex0, vertex1, vertex2)
+
+			switch (*splitMeshConfig).UntangleAmbiguityMethod {
+			case MAJORITY_OR_FIRST_INDEX:
+				if vertexLabel0 == vertexLabel1 || vertexLabel0 == vertexLabel2 {
+					appendMesh(&meshObjMap, vertexLabel0, vertex0, vertex1, vertex2)
+				} else if vertexLabel1 == vertexLabel2 {
+					appendMesh(&meshObjMap, vertexLabel1, vertex0, vertex1, vertex2)
+				} else {
+					// if all three vertex disagrees, use first index
+					appendMesh(&meshObjMap, vertexLabel0, vertex0, vertex1, vertex2)
+				}
+			case EMPTY_LABEL:
+				fallthrough
+			default:
+				appendMesh(&meshObjMap, EMPTY_LABEL, vertex0, vertex1, vertex2)
+			}
 		}
 	}
 
@@ -166,5 +180,6 @@ type SplitMeshConfig struct {
 }
 
 const (
-	EMPTY_LABEL = "EMPTY_LABEL"
+	EMPTY_LABEL             = "EMPTY_LABEL"
+	MAJORITY_OR_FIRST_INDEX = "MAJORITY_OR_FIRST_INDEX"
 )

@@ -84,7 +84,7 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 		meshMap, vertexMap := common.ProcessSplitMeshByVertexfile(pathToMeshSplitVertexFile)
 
 		for meshIdx, mesh := range meshes {
-			splitMeshMap := common.SplitMesh(&mesh, &meshMap, &vertexMap)
+			splitMeshMap := common.SplitMesh(&mesh, &meshMap, &vertexMap, &splitMeshConfig)
 			for key, val := range *splitMeshMap {
 				submeshName := fmt.Sprintf("%v_%v", meshIdx, key)
 				submeshNameToMeshMap[submeshName] = val
@@ -136,6 +136,7 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 			fragmentOutBuffer[key] = ngPrecomputed.Export([]common.Mesh{mesh})[0]
 		}
 	case detType.OFF_ASCII:
+		fallthrough
 	default:
 		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
 	}

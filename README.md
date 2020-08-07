@@ -1,4 +1,5 @@
 # goNG
+
 Yet another package that converts popular 3D formats (gii, obj, off, stl, gltf) and [neuroglancer precomputed mesh format](https://github.com/google/neuroglancer/tree/5bfa8c3/src/neuroglancer/datasource/precomputed#legacy-single-resolution-mesh-format)
 
 # Requirements
@@ -30,6 +31,10 @@ TODO code examples
 - obj
 - vtk
 - OFF ascii
+
+## Splitting meshes
+
+See <common/splitMesh.md>
 
 # Development
 

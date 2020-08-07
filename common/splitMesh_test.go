@@ -64,36 +64,88 @@ func TestSplitMesh(t *testing.T) {
 		},
 	}
 
-	meshMap := MeshMap{
-		"a": []uint32{
-			uint32(0),
-			uint32(1),
-			uint32(2),
+	tables := []struct {
+		meshPtr         *Mesh
+		meshMap         MeshMap
+		vertexMap       VertexMap
+		splitMeshConfig SplitMeshConfig
+		expectedResult  map[string]int
+	}{
+		{
+			&mesh,
+			MeshMap{
+				"a": []uint32{
+					uint32(0),
+					uint32(1),
+					uint32(2),
+				},
+				"b": []uint32{
+					uint32(3),
+					uint32(4),
+					uint32(5),
+				},
+			},
+			VertexMap{
+				uint32(0): "a",
+				uint32(1): "a",
+				uint32(2): "a",
+				uint32(3): "b",
+				uint32(4): "b",
+				uint32(5): "b",
+			},
+			SplitMeshConfig{
+				SplitMeshByVerticesPath: "",
+				UntangleAmbiguityMethod: EMPTY_LABEL,
+			},
+			map[string]int{
+				"a": 1,
+				"b": 1,
+			},
 		},
-		"b": []uint32{
-			uint32(3),
-			uint32(4),
-			uint32(5),
+		{
+			&mesh,
+			MeshMap{
+				"a": []uint32{
+					uint32(0),
+					uint32(1),
+					uint32(3),
+				},
+				"b": []uint32{
+					uint32(2),
+					uint32(4),
+				},
+				"c": []uint32{
+					uint32(5),
+				},
+			},
+			VertexMap{
+				uint32(0): "a",
+				uint32(1): "a",
+				uint32(2): "b",
+				uint32(3): "a",
+				uint32(4): "a",
+				uint32(5): "c",
+			},
+			SplitMeshConfig{
+				SplitMeshByVerticesPath: "",
+				UntangleAmbiguityMethod: MAJORITY_OR_FIRST_INDEX,
+			},
+			map[string]int{
+				"a": 2,
+				"b": 0,
+				"c": 0,
+			},
 		},
 	}
 
-	vertexMap := VertexMap{
-		uint32(0): "a",
-		uint32(1): "a",
-		uint32(2): "a",
-		uint32(3): "b",
-		uint32(4): "b",
-		uint32(5): "b",
-	}
+	for _, table := range tables {
+		splitMeshesPtr := SplitMesh(table.meshPtr, &(table.meshMap), &(table.vertexMap), &(table.splitMeshConfig))
+		for key, numFaces := range table.expectedResult {
+			mesh := (*splitMeshesPtr)[key]
 
-	splitMeshesPtr := SplitMesh(&mesh, &meshMap, &vertexMap)
-
-	if len(*splitMeshesPtr) != 2 {
-		t.Errorf("expected split mesh ptr to have length 2, but have length %v", len(*splitMeshesPtr))
-	}
-	for key := range *splitMeshesPtr {
-		if key != "a" && key != "b" {
-			t.Errorf("key other than a or b are present %v", key)
+			if len(mesh.Faces) != numFaces {
+				t.Errorf("label %v expected to have %v faces, but got %v faces", key, table.expectedResult[key], len(mesh.Faces))
+			}
 		}
 	}
 }

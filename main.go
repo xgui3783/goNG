@@ -66,6 +66,7 @@ In the above example, vertices with index 0 and 1 belong to label_a, but vertex 
 
 	validAmbiguousStrategies := []string{
 		common.EMPTY_LABEL,
+		common.MAJORITY_OR_FIRST_INDEX,
 	}
 	splitMeshAmbiguousStrategyHelperTxt := fmt.Sprintf(`Strategy when there are ambiguous triangles %v`, validAmbiguousStrategies)
 	splitMeshAmbiguousStrategy := flag.String("splitMeshAmbiguousStrategy", common.EMPTY_LABEL, splitMeshAmbiguousStrategyHelperTxt)
