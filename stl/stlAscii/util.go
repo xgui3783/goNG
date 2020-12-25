@@ -67,7 +67,7 @@ func ParseAsciiStl(buffer []byte) common.Mesh {
 	for _, triangle := range triangles {
 		re2 := regexp.MustCompile(`(?m)vertex\s{1,}(.*?)$`)
 		vertices := re2.FindAll(triangle, -1)
-		
+
 		parsedVertices := [3]common.Vertex{
 			parseStlAsciiLine(vertices[0]),
 			parseStlAsciiLine(vertices[1]),
@@ -88,7 +88,7 @@ func ParseAsciiStl(buffer []byte) common.Mesh {
 	}
 }
 
-func WriteAsciiStlFromMesh(mesh common.Mesh, meshMetadata common.MeshMetadata) []byte {
+func WriteAsciiStlFromMesh(mesh common.Mesh) []byte {
 	buf := new(bytes.Buffer)
 	buf.Write([]byte("solid Untitled\n"))
 

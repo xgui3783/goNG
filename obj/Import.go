@@ -5,9 +5,11 @@ import (
 	"gong/common"
 )
 
-func Import(rootPath string) []common.Mesh {
-	fileBytes := common.GetResource(rootPath)
-	return ParseObjBytes(fileBytes)
+func Import(manyFiles [][]byte) (returnMesh []common.Mesh) {
+	for _, singleFile := range manyFiles {
+		returnMesh = append(returnMesh, ParseObjBytes(singleFile)...)
+	}
+	return
 }
 
 func Export(meshes []common.Mesh) [][]byte {

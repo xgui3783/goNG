@@ -4,25 +4,42 @@ import (
 	"bytes"
 	"encoding/binary"
 	"gong/common"
-	"math"
+	"gong/stl/stlCommon"
 )
 
-func putFloatTriplet(coord common.Vertex) []byte {
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, math.Float32bits(coord[0]))
-	binary.Write(buf, binary.LittleEndian, math.Float32bits(coord[1]))
-	binary.Write(buf, binary.LittleEndian, math.Float32bits(coord[2]))
-	return buf.Bytes()
+type binaryStlQuintStruct struct {
+	Normal    [3]float32
+	Vertex1   [3]float32
+	Vertex2   [3]float32
+	Vertex3   [3]float32
+	Attribute uint16
+}
+
+func parseBytesAsFloat32(input []byte) (strPtr *binaryStlQuintStruct) {
+
+	r := bytes.NewReader(input)
+
+	if err := binary.Read(r, binary.LittleEndian, strPtr); err != nil {
+		panic("parseBytesAsFloat32 error\n")
+	}
+
+	return
 }
 
 func assemble(vertices [3]common.Vertex) []byte {
 	buf := new(bytes.Buffer)
 	normal := common.GetNormal(vertices)
 
-	binary.Write(buf, binary.LittleEndian, putFloatTriplet(normal))
+	putFloatTriplet := func(coord common.Vertex) {
+		stlCommon.AppendFloat32ToBuffer(coord[0], buf)
+		stlCommon.AppendFloat32ToBuffer(coord[1], buf)
+		stlCommon.AppendFloat32ToBuffer(coord[2], buf)
+	}
+
+	putFloatTriplet(normal)
 
 	for _, v := range vertices {
-		binary.Write(buf, binary.LittleEndian, putFloatTriplet(v))
+		putFloatTriplet(v)
 	}
 
 	padding := make([]byte, 2, 2)
@@ -47,7 +64,7 @@ func getStlHeader() []byte {
 	return header
 }
 
-func WriteBinaryStlFromMesh(mesh common.Mesh, metadata common.MeshMetadata) []byte {
+func WriteBinaryStlFromMesh(mesh common.Mesh) []byte {
 
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.LittleEndian, getStlHeader())
@@ -75,4 +92,22 @@ func WriteBinaryStlFromMesh(mesh common.Mesh, metadata common.MeshMetadata) []by
 	}
 
 	return buf.Bytes()
+}
+
+func parseBinaryStl(input []byte) *(common.Mesh) {
+	mesh := common.Mesh{}
+	meshData := input[84:]
+	numTriangles := binary.LittleEndian.Uint32(input[80:84])
+	stlAppendFace := stlCommon.PrepareStlAppendFace(&mesh)
+	for i := uint32(0); i < numTriangles; i++ {
+		startIdx := 14 * i
+		endIdx := startIdx + 14
+		strPtr := parseBytesAsFloat32(meshData[startIdx:endIdx])
+		stlAppendFace([3]common.Vertex{
+			(*strPtr).Vertex1,
+			(*strPtr).Vertex2,
+			(*strPtr).Vertex3,
+		})
+	}
+	return &mesh
 }

@@ -3,18 +3,19 @@ package stlBinary
 import (
 	"bytes"
 	"gong/common"
-	"gong/stlAscii"
+	"gong/stl/stlAscii"
 	"io/ioutil"
 	"testing"
 )
 
 func TestWriteBinaryStlFromMesh(t *testing.T) {
-	cubeMesh := stlAscii.Import("../testData/cube.stl")
+	singleFile := common.GetResource("../../testData/cube.stl")
+	cubeMesh := stlAscii.Import([][]byte{singleFile})
 	outgoingBytes := make([][]byte, 0)
-	for idx, mesh := range cubeMesh {
-		outgoingBytes = append(outgoingBytes, WriteBinaryStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
+	for _, mesh := range cubeMesh {
+		outgoingBytes = append(outgoingBytes, WriteBinaryStlFromMesh(mesh))
 	}
-	testCubeBin, err := ioutil.ReadFile("../testData/cube_binary.stl")
+	testCubeBin, err := ioutil.ReadFile("../../testData/cube_binary.stl")
 	if err != nil {
 		panic(err)
 	}

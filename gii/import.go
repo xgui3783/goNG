@@ -2,9 +2,11 @@ package gii
 
 import "gong/common"
 
-func Import(rootPath string) []common.Mesh {
-	fileBytes := common.GetResource(rootPath)
-	return ParseGii(fileBytes)
+func Import(manyFiles [][]byte) (returnMesh []common.Mesh) {
+	for _, singleFile := range manyFiles {
+		returnMesh = append(returnMesh, ParseGii(singleFile)...)
+	}
+	return
 }
 
 func Export(meshes []common.Mesh) [][]byte {

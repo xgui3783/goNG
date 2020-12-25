@@ -5,7 +5,6 @@ import (
 	"gong/detProtocol"
 	"io/ioutil"
 	"math"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -169,16 +168,18 @@ func GetResource(rootPath string) []byte {
 }
 
 func GetHTTPResource(rootPath string) []byte {
-	resp, err := http.Get(rootPath)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	body, moreErr := ioutil.ReadAll(resp.Body)
-	if moreErr != nil {
-		panic(moreErr)
-	}
-	return body
+	panic("does not support HTTP protocol")
+
+	// resp, err := http.Get(rootPath)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer resp.Body.Close()
+	// body, moreErr := ioutil.ReadAll(resp.Body)
+	// if moreErr != nil {
+	// 	panic(moreErr)
+	// }
+	// return body
 }
 
 func SplitByNewLine(input string) []string {

@@ -120,11 +120,7 @@ func (m *TransformationMatrix) UnmarshalText(text []byte) error {
 			fmt.Printf("return error")
 			return err
 		}
-		// if &(m[row]) == nil {
-		// 	m[row] = [4]float64{}
-		// }
-		fmt.Printf("%d, %d, %f\n", row, col, parsedFloat)
-		// m[row][col] = parsedFloat
+		m[row][col] = parsedFloat
 	}
 	return nil
 }

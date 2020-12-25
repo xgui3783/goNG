@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseAsciiStl(t *testing.T) {
-	cube, err := ioutil.ReadFile("../testData/cube.stl")
+	cube, err := ioutil.ReadFile("../../testData/cube.stl")
 	if err != nil {
 		panic(err)
 	}
