@@ -4,13 +4,7 @@ import (
 	"fmt"
 	"gong/common"
 	"gong/detType"
-	"gong/gii"
-	"gong/ngPrecomputed"
-	"gong/obj"
-	"gong/offAscii"
-	"gong/stlAscii"
-	"gong/stlBinary"
-	"gong/vtk"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -18,8 +12,9 @@ import (
 	"regexp"
 )
 
-func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string, flipTriangle bool, forceTriangleFlag bool, splitMeshConfig common.SplitMeshConfig) {
+var inputBytes = make([]byte, 0)
 
+func Convert(inputFormat string, inputSource string, outputFormat string, outputDest string, xformMatrixString string, flipTriangle bool, forceTriangleFlag bool, splitMeshConfig common.SplitMeshConfig) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintf(os.Stderr, "error: %v", r)
@@ -29,39 +24,58 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 	pathToMeshSplitVertexFile := splitMeshConfig.SplitMeshByVerticesPath
 
 	if inputSource == "" {
-		panic("inputSource is empty\n")
+		fmt.Printf("inputSource not provided, listening from stdin until EOF... \n")
+		var d []byte
+		for {
+			_, err := fmt.Scan(&d)
+			if err != nil {
+				if err != io.EOF {
+					panic(err)
+				}
+				break
+			}
+			// TODO too slow... maybe use byte writer or something?
+			inputBytes = append(inputBytes, d...)
+		}
 	}
 
 	if outputDest == "" {
 		panic("outputSource is empty\n")
 	}
 
-	var xformMatrix common.TransformationMatrix
-	xformMatrix.ParseCommaDelimitedString(xformMatrixString)
-
-	var meshes []common.Mesh
+	// verify input format
 	var incFileType string
 	if inputFormat == "" {
+		if inputSource == "" {
+			panic("if stdin is used to provide src, -srcFormat must be defined,")
+		}
 		incFileType = detType.InferTypeFromFilename(inputSource)
 	} else {
 		incFileType = inputFormat
 	}
-	switch incFileType {
-	case detType.NG_MESH:
-		meshes = ngPrecomputed.Import(inputSource, nil)
-	case detType.STL_ASCII:
-		meshes = stlAscii.Import(inputSource)
-	case detType.GII:
-		meshes = gii.Import(inputSource)
-	case detType.OBJ:
-		meshes = obj.Import(inputSource)
-	case detType.VTK:
-		meshes = vtk.Import(inputSource)
-	case detType.OFF_ASCII:
-		meshes = offAscii.Import(inputSource)
-	default:
-		panic("incoming file type other than NG_MESH is currently not supported\n")
+	importFn, ok := meshTypeToImportMap[incFileType]
+	if !ok {
+		panicText := fmt.Sprintf("intput type %v not supported", incFileType)
+		panic(panicText)
 	}
+
+	// verify output format
+	var outFileType string
+	if outputFormat == "" {
+		outFileType = detType.InferTypeFromFilename(outputDest)
+	} else {
+		outFileType = outputFormat
+	}
+	exportFn, ok := meshTypeToExportMap[outFileType]
+	if len(inputBytes) == 0 {
+		inputBytes = common.GetResource(inputSource)
+	}
+	meshes := importFn([][]byte{inputBytes})
+
+	// TODO move transform to build config
+	// json marshalling makes wasm build difficult
+	var xformMatrix common.TransformationMatrix
+	xformMatrix.ParseCommaDelimitedString(xformMatrixString)
 
 	for mIdx, _ := range meshes {
 		for vIdx, _ := range meshes[mIdx].Vertices {
@@ -93,52 +107,11 @@ func Convert(inputFormat string, inputSource string, outputFormat string, output
 	}
 
 	var outBuffer []([]byte)
-	var outFileType string
 	fragmentOutBuffer := map[string][]byte{}
-	if outputFormat == "" {
-		outFileType = detType.InferTypeFromFilename(outputDest)
-	} else {
-		outFileType = outputFormat
-	}
-	switch outFileType {
-	case detType.STL_ASCII:
-		for idx, mesh := range meshes {
-			outBuffer = append(outBuffer, stlAscii.WriteAsciiStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
-		}
-		if len(submeshNameToMeshMap) > 0 {
-			fmt.Printf("submeshes not yet implemented for STL_ASCII")
-		}
-	case detType.STL_BINARY:
-		for idx, mesh := range meshes {
-			outBuffer = append(outBuffer, stlBinary.WriteBinaryStlFromMesh(mesh, common.MeshMetadata{Index: idx}))
-		}
-		if len(submeshNameToMeshMap) > 0 {
-			fmt.Printf("submeshes not yet implemented for STL_BINARY")
-		}
-	case detType.OBJ:
-		outBuffer = obj.Export(meshes)
-		for key, mesh := range submeshNameToMeshMap {
-			fragmentOutBuffer[key] = obj.Export([]common.Mesh{mesh})[0]
-		}
-	case detType.GII:
-		outBuffer = gii.Export(meshes)
-		for key, mesh := range submeshNameToMeshMap {
-			fragmentOutBuffer[key] = gii.Export([]common.Mesh{mesh})[0]
-		}
-	case detType.VTK:
-		outBuffer = vtk.Export(meshes)
-		for key, mesh := range submeshNameToMeshMap {
-			fragmentOutBuffer[key] = vtk.Export([]common.Mesh{mesh})[0]
-		}
-	case detType.NG_MESH:
-		outBuffer = ngPrecomputed.Export(meshes)
-		for key, mesh := range submeshNameToMeshMap {
-			fragmentOutBuffer[key] = ngPrecomputed.Export([]common.Mesh{mesh})[0]
-		}
-	case detType.OFF_ASCII:
-		fallthrough
-	default:
-		panic(fmt.Sprintf("ouputFormat %v is not current supported\n", outFileType))
+	outBuffer = exportFn(meshes)
+
+	for key, mesh := range submeshNameToMeshMap {
+		fragmentOutBuffer[key] = exportFn([]common.Mesh{mesh})[0]
 	}
 
 	if len(outBuffer) == 1 {
