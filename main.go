@@ -1,47 +1,70 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
-	"gong/actions"
-	"gong/common"
+	"gong/convert"
+	"gong/split"
+	"os"
+	"gongcommon"
+	"gongio/glue"
 )
 
-var validSrcFormats = []string{}
-var validOutputFormats = []string{}
+var subCmds = []string{}
 
 func init() {
-	validSrcFormats = actions.GetSupportedIncTypes()
-	validOutputFormats = actions.GetSupportedOutTypes()
+	validSrcFormats := glue.GetSupportedIncTypes()
+	validOutputFormats := glue.GetSupportedOutTypes()
+	convert.SetFormats(validSrcFormats, validOutputFormats)
+
+	// add split subcommand
+	splitSubCmd := gongcommon.SubCmd{
+		Name:       split.SubCmd,
+		Parse:      split.Parse,
+		HelperText: split.HelperText,
+	}
+	splitSubCmd.Init()
+	SubCmdMap[split.SubCmd] = &splitSubCmd
+	subCmds = append(subCmds, split.SubCmd)
+
+	convert.MeshTypeToImportMap = &(glue.MeshTypeToImportMap)
+	convert.MeshTypeToExportMap = &(glue.MeshTypeToExportMap)
+
+	// add convert subcommand
+	convertSubCmd := gongcommon.SubCmd{
+		Name:       convert.SubCmd,
+		Parse:      convert.Parse,
+		HelperText: convert.HelperText,
+	}
+	convertSubCmd.Init()
+	SubCmdMap[convert.SubCmd] = &convertSubCmd
+	subCmds = append(subCmds, convert.SubCmd)
+}
+
+func parseSubcmd(arg []string) error {
+	if len(arg) < 1 {
+		return errors.New("Subcommand is required!")
+	}
+	if subCmd, found := SubCmdMap[arg[0]]; !found {
+		errorText := fmt.Sprintf(
+			"Valid subcommands %v \nSubcommand %v not found",
+			subCmds,
+			arg[0],
+		)
+		flag.PrintDefaults()
+		return errors.New(errorText)
+	} else {
+		return subCmd.RunParse()
+	}
 }
 
 func main() {
-	srcFormatPtr := flag.String("srcFormat", "", getSrcFormatHelperText())
-	srcPtr := flag.String("src", "", srcHelperText)
-	outputFormatPtr := flag.String("outputFormat", "", getOutputFormatHelperText())
-	dstPtr := flag.String("dst", "", dstHelperText)
-	xformMatrix := flag.String("xformMatrix", "1,0,0,0,0,1,0,0,0,0,1,0", xformMatrixHelperText)
-	flipTriangle := flag.Bool("forceTriangleFlip", false, flipTriangleHelperText)
-	forceTriangleFlag := false
-	splitMeshByVertex := flag.String("splitByVertexPath", "", splitMeshByVertexHelperText)
-	validAmbiguousStrategies := []string{
-		common.EMPTY_LABEL,
-		common.MAJORITY_OR_FIRST_INDEX,
+	if err := parseSubcmd(os.Args[1:]); err != nil {
+		fmt.Println(err)
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
-	splitMeshAmbiguousStrategyHelperTxt := fmt.Sprintf(`Strategy when there are ambiguous triangles %v`, validAmbiguousStrategies)
-	splitMeshAmbiguousStrategy := flag.String("splitMeshAmbiguousStrategy", common.EMPTY_LABEL, splitMeshAmbiguousStrategyHelperTxt)
-
-	flag.Parse()
-
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == "forceTriangleFlip" {
-			forceTriangleFlag = true
-		}
-	})
-
-	splitMeshConfig := common.SplitMeshConfig{
-		UntangleAmbiguityMethod: *splitMeshAmbiguousStrategy,
-		SplitMeshByVerticesPath: *splitMeshByVertex,
-	}
-	actions.Convert(*srcFormatPtr, *srcPtr, *outputFormatPtr, *dstPtr, *xformMatrix, *flipTriangle, forceTriangleFlag, splitMeshConfig)
 }
+
+var SubCmdMap = map[string]*gongcommon.SubCmd{}

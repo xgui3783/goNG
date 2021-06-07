@@ -27,7 +27,7 @@ jobs:
       
     - name: Build
       run: |
-        go build -tags "all" -o ./gong
+        go build -mod vendor -tags "all" -o ./gong
 
     - name: Create Release
       id: create_release
