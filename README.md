@@ -43,7 +43,7 @@ from v2.0+ onwards, gong supports [go build constraints](https://golang.org/pkg/
 For example, if only the conversion bewteen `STL_ASCII` and `NG_MESH` is required, a smaller binary can be built with:
 
 ```bash
-go build -tags "ng_mesh stl_ascii"
+go build -mod vendor -tags "ng_mesh stl_ascii"
 ```
 
 Available tags are:
