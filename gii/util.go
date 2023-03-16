@@ -63,33 +63,15 @@ func ParseGii(gii []byte) []common.Mesh {
 	}
 
 	/** process vertices */
-	splitVerticesString := common.SplitStringByWhiteSpaceNL(vertices.Data.Value)
-	if len(splitVerticesString)%3 != 0 {
-		panicText := fmt.Sprintf("numver of values of NIFTI_INTENT_POINTSET is not a multiple of 3: it is %d", len(splitVerticesString))
-		panic(panicText)
-	}
-
 	outputVertices := []common.Vertex{}
-	for i := 0; i < len(splitVerticesString)/3; i++ {
-		v := parseStringsToFloat([3]string{splitVerticesString[i*3], splitVerticesString[i*3+1], splitVerticesString[i*3+2]})
-		outputVertices = append(outputVertices, common.Vertex(v))
+	for _, triplet := range vertices.getFloatTriplets() {
+		outputVertices = append(outputVertices, common.Vertex(triplet))
 	}
 
 	/** process faces */
-	splitFacesString := common.SplitStringByWhiteSpaceNL(faces.Data.Value)
-	if len(splitFacesString)%3 != 0 {
-		panicText := fmt.Sprintf("numver of values of NIFTI_INTENT_TRIANGLE is not a multiple of 3: it is %d", len(splitFacesString))
-		panic(panicText)
-	}
-
 	outputFaces := []common.Face{}
-	for i := 0; i < len(splitFacesString)/3; i++ {
-		f := parseStringsToInt([3]string{
-			splitFacesString[i*3],
-			splitFacesString[i*3+1],
-			splitFacesString[i*3+2],
-		})
-		outputFaces = append(outputFaces, common.Face(f))
+	for _, triplet := range faces.getIntTriplets() {
+		outputFaces = append(outputFaces, common.Face(triplet))
 	}
 
 	return []common.Mesh{
