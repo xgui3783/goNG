@@ -16,9 +16,9 @@ type binaryStlQuintStruct struct {
 }
 
 func parseBytesAsFloat32(input []byte) (strPtr *binaryStlQuintStruct) {
+	strPtr = &(binaryStlQuintStruct{})
 
 	r := bytes.NewReader(input)
-
 	if err := binary.Read(r, binary.LittleEndian, strPtr); err != nil {
 		panic("parseBytesAsFloat32 error\n")
 	}
@@ -95,19 +95,60 @@ func WriteBinaryStlFromMesh(mesh common.Mesh) []byte {
 }
 
 func parseBinaryStl(input []byte) *(common.Mesh) {
-	mesh := common.Mesh{}
 	meshData := input[84:]
 	numTriangles := binary.LittleEndian.Uint32(input[80:84])
-	stlAppendFace := stlCommon.PrepareStlAppendFace(&mesh)
+	
+	mapVertIdx := make(map[float32]map[float32]map[float32]uint32, 0)
+	vertexIndex := uint32(0)
+
+	makeDeepMap := func(x float32, y float32, z float32) {
+		_, okx := mapVertIdx[x]
+		if okx == false {
+			mapVertIdx[x] = make(map[float32]map[float32]uint32)
+		}
+		_, oky := mapVertIdx[x][y]
+		if oky == false {
+			mapVertIdx[x][y] = make(map[float32]uint32)
+		}
+	}
+	vertices := make([]common.Vertex, 0, vertexIndex)
+	getVertexIndex := func(vertex common.Vertex) uint32 {
+		// TODO relying on float32 equality, which is always a shaky thing to rely on
+		idx, ok := mapVertIdx[vertex[0]][vertex[1]][vertex[2]]
+		if ok == false {
+			makeDeepMap(vertex[0], vertex[1], vertex[2])
+
+			defer func() {
+				vertexIndex++
+			}()
+			mapVertIdx[vertex[0]][vertex[1]][vertex[2]] = vertexIndex
+			vertices = append(vertices, vertex)
+			return vertexIndex
+		} else {
+			return idx
+		}
+	}
+	faces := []common.Face{}
+
 	for i := uint32(0); i < numTriangles; i++ {
-		startIdx := 14 * i
-		endIdx := startIdx + 14
+		startIdx := 50 * i
+		endIdx := startIdx + 50
 		strPtr := parseBytesAsFloat32(meshData[startIdx:endIdx])
-		stlAppendFace([3]common.Vertex{
+		parsedVertices := [3]common.Vertex{
 			(*strPtr).Vertex1,
 			(*strPtr).Vertex2,
 			(*strPtr).Vertex3,
-		})
+		}
+		faceVertexIndex := [3]uint32{
+			getVertexIndex(parsedVertices[0]),
+			getVertexIndex(parsedVertices[1]),
+			getVertexIndex(parsedVertices[2]),
+		}
+
+		faces = append(faces, common.Face{faceVertexIndex[0], faceVertexIndex[1], faceVertexIndex[2]})
 	}
-	return &mesh
+	return &common.Mesh{
+		Faces:    faces,
+		Vertices: vertices,
+	}
 }
