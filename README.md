@@ -66,6 +66,25 @@ go >= 1.11
 git
 git lfs # for downloading testing meshes
 ```
+
+clone repo with 
+
+```sh
+$ git clone https://github.com/xgui3783/goNG.git && cd goNG
+```
+
+Then
+
+```sh
+go run -tags "all" gong --help
+```
+
+## Release
+
+On tag commit in the form of `v{major}.{minor}.{bugfix}`, and push the said tag. 
+
+Github action will takecare of the rest.
+
 ## License
 
 MIT
